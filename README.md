@@ -24,7 +24,7 @@ cd ~/projects/lms
 - Thymeleaf
 - JdbcTemplate (핵심 Repository)
 - JPA (ddl-auto=validate 검증용)
-- MySQL (개발 테스트는 H2)
+- MySQL
 
 ---
 
@@ -58,24 +58,21 @@ cd ~/projects/lms
 - 강의별 일괄 기록
 - 학생별 일괄 편집(업서트)
 - 출석률 계산(학생/관리자)
-- CSV 다운로드:
-  - 일반 CSV
-  - 기간 CSV
-  - 결석만 CSV
-  - 출석률 요약 CSV
-  - 결석 TOP N CSV
+- CSV 다운로드(일반/기간/결석/요약/TOP N)
 
 ### 관리자 대시보드
 - 핵심 지표 카드
 - 결석 위험(기준% 동적 설정)
-- 결석 위험 학생 목록
+- 위험 학생 목록
 - 결석 TOP 10
 - 감사로그 조회
-- 위험학생 공지/메시지 지원:
-  - 공지 초안 채우기
-  - 과목별 공지 초안(.md)
-  - 과목별 공지 자동등록(중복 방지)
-  - 경고 메시지 템플릿(.txt)
+- 공지 초안/자동등록 지원
+
+### UI/UX 개선 사항
+- 공통 헤더/내비게이션(fragment) 기반 화면 일관성 강화
+- 역할별 홈 퀵링크 문구 분기
+- 출석 상태 한글 라벨 표시(출석/지각/결석)
+- 삭제 액션 확인창 + 경고 스타일 적용
 
 ---
 
@@ -86,13 +83,8 @@ cd ~/projects/lms
 3. 강의 목록 검색 + 강의 상세 이동
 4. 수강신청 등록/취소 시연
 5. 과제 등록 → 제출(학생) → 채점(강사/관리자)
-6. 출석 관리
-   - 일괄 기록
-   - 학생별 일괄 편집
-   - CSV 다운로드
-7. 관리자 대시보드
-   - 결석 위험 기준 조절
-   - 공지 초안/자동등록 버튼 시연
+6. 출석 관리 (일괄 기록/학생별 편집/CSV 다운로드)
+7. 관리자 대시보드 (결석 위험 기준 조절, 공지 초안/자동등록)
 
 ---
 
@@ -103,16 +95,43 @@ cd ~/projects/lms
 - [ ] 로그인/권한 흐름 확인
 - [ ] 과제 제출/채점 확인
 - [ ] 출석 CSV 다운로드 확인
-- [ ] 관리자 대시보드 버튼 동작 확인
+- [ ] 관리자 대시보드 동작 확인
 
 ---
 
-## 6) 참고
+## 6) 실행 트러블슈팅
 
-DB 스키마 변경으로 충돌이 나면 개발용 초기화:
+### 6.1 DB 인증 실패
+에러 예시: `Access denied for user 'root'@'localhost' (using password: NO)`
+
+```bash
+export DB_USERNAME=root
+export DB_PASSWORD='내_mysql_비밀번호'
+./gradlew bootRun
+```
+
+### 6.2 포트 충돌
+기본 8080 포트가 사용 중이면:
+
+```bash
+./gradlew bootRun --args='--server.port=8081'
+# 또는 8083
+./gradlew bootRun --args='--server.port=8083'
+```
+
+### 6.3 DB 초기화
 
 ```bash
 mysql -u root -p -e "DROP DATABASE IF EXISTS lms; CREATE DATABASE lms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+./gradlew bootRun
 ```
 
-그 다음 `./gradlew bootRun`.
+---
+
+## 7) 문서
+- `LMS_Project_Performance_Plan.md`
+- `Requirements_Specification.md`
+- `Architecture_Design_Document.md`
+- `UI_UX_Design_Specification.md`
+- `Database_Design_Document.md`
+- `plan.md` (화면 캡처 모음)
