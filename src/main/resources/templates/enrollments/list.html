@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>수강신청</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+<div class="page-title">
+    <h1>수강신청</h1>
+    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+</div>
+<div class="topbar">
+    <a th:href="@{/}">홈</a>
+</div>
+
+<div class="box">
+    <p class="msg" th:if="${message != null}" th:text="${message}"></p>
+    <form class="enroll-form" th:action="@{/enrollments}" method="post">
+        <label th:if="${loginUser.role == 'ADMIN'}">사용자
+            <select name="userId" required>
+                <option th:each="u : ${users}" th:value="${u.id}" th:text="|${u.name} (${u.role})|"></option>
+            </select>
+        </label>
+        <div th:if="${loginUser.role != 'ADMIN'}">
+            <input type="hidden" name="userId" th:value="${loginUser.id}">
+            <b th:text="|신청자: ${loginUser.name} (${loginUser.role})|"></b>
+        </div>
+
+        <label>강의
+            <select name="courseId" required>
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="|${c.title} (${c.category})|"></option>
+            </select>
+        </label>
+
+        <button type="submit">수강신청</button>
+    </form>
+    <small>※ 학생/강사는 본인 계정으로만 신청됩니다.</small>
+</div>
+
+<div class="box" th:if="${loginUser.role == 'ADMIN'}">
+    <h3>학생 일괄 수강신청</h3>
+    <form th:action="@{/enrollments/bulk-students}" method="post">
+        <label>강의
+            <select name="courseId" required>
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="|${c.title} (${c.category})|"></option>
+            </select>
+        </label>
+        <label>최대 인원 <input type="number" name="limit" min="1" max="300" value="30"></label>
+        <button type="submit">학생 일괄 신청</button>
+    </form>
+</div>
+
+<div class="box">
+<table>
+    <thead><tr><th>신청ID</th><th>이름</th><th>이메일</th><th>강의</th><th>카테고리</th><th>관리</th></tr></thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(enrollments)}"><td colspan="6">신청 내역이 없습니다.</td></tr>
+    <tr th:each="e : ${enrollments}">
+        <td th:text="${e.enrollmentId}"></td>
+        <td th:text="${e.userName}"></td>
+        <td th:text="${e.userEmail}"></td>
+        <td th:text="${e.courseTitle}"></td>
+        <td th:text="${e.category}"></td>
+        <td>
+            <form th:action="@{/enrollments/cancel}" method="post">
+                <input type="hidden" name="enrollmentId" th:value="${e.enrollmentId}">
+                <button type="submit">신청취소</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+</div>
+</body>
+</html>

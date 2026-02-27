@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>출석 관리</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .att-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
+        .att-grid-1{display:grid;grid-template-columns:1fr;gap:14px}
+        .step{font-size:12px;color:#475569;font-weight:700;margin-bottom:6px}
+        .kpi{display:flex;gap:10px;flex-wrap:wrap}
+        .kpi .item{background:#f8fafc;border:1px solid #dbeafe;border-radius:10px;padding:10px 12px;min-width:150px}
+        .kpi .num{font-size:20px;font-weight:800;color:#1d4ed8}
+        .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .sticky-help{font-size:13px;color:#334155;background:#eff6ff;border:1px solid #bfdbfe;padding:8px 10px;border-radius:8px}
+        @media (max-width: 1000px){.att-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-title">
+        <h1>출석 관리</h1>
+        <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+    </div>
+    <div class="topbar">
+        <a th:href="@{/}">홈</a>
+    </div>
+
+    <p class="msg" th:if="${message}" th:text="${message}"></p>
+
+    <div class="box">
+        <div class="step">요약</div>
+        <div class="kpi">
+            <div class="item"><div>출석 수</div><div class="num" th:text="${summary.presentCount}">0</div></div>
+            <div class="item"><div>전체 기록</div><div class="num" th:text="${summary.totalCount}">0</div></div>
+            <div class="item"><div>출석률</div><div class="num" th:text="|${#numbers.formatDecimal(summary.attendanceRate,1,1)}%|">0.0%</div></div>
+        </div>
+    </div>
+
+    <div th:if="${loginUser.canManageCourses()}" class="att-grid" style="margin-top:14px;">
+        <div class="box">
+            <div class="step">1) 조회 기준 선택</div>
+            <form th:action="@{/attendance}" method="get">
+                <label>강의
+                    <select name="courseId" required>
+                        <option value="">선택</option>
+                        <option th:each="c : ${courses}" th:value="${c.id}" th:selected="${selectedCourseId == c.id}" th:text="${c.title}"></option>
+                    </select>
+                </label>
+                <label>월 <input type="month" name="month" th:value="${selectedMonth}"></label>
+                <label>날짜(선택) <input type="date" name="date" th:value="${selectedDate}"></label>
+                <button type="submit">조회</button>
+            </form>
+            <p class="sticky-help">강의를 먼저 선택하면 아래 월간표/이슈나열/학생별 일괄편집이 활성화됩니다.</p>
+        </div>
+
+        <div class="box">
+            <div class="step">2) 빠른 기록</div>
+            <form th:action="@{/attendance/bulk}" method="post">
+                <label>강의
+                    <select name="courseId" required>
+                        <option th:each="c : ${courses}" th:value="${c.id}" th:selected="${selectedCourseId == c.id}" th:text="${c.title}"></option>
+                    </select>
+                </label>
+                <label>날짜 <input type="date" name="attendanceDate" th:value="${defaultAttendanceDate}" required></label>
+                <label>상태
+                    <select name="status" required>
+                        <option value="PRESENT">PRESENT</option>
+                        <option value="LATE">LATE</option>
+                        <option value="ABSENT">ABSENT</option>
+                    </select>
+                </label>
+                <button type="submit">강의 일괄기록</button>
+            </form>
+
+            <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0;">
+
+            <form th:action="@{/attendance}" method="post">
+                <label>수강신청
+                    <select name="enrollmentId" required>
+                        <option th:each="e : ${enrollments}" th:value="${e.enrollmentId}" th:text="|${e.userName} - ${e.courseTitle}|"></option>
+                    </select>
+                </label>
+                <label>날짜 <input type="date" name="attendanceDate" th:value="${defaultAttendanceDate}" required></label>
+                <label>상태
+                    <select name="status" required>
+                        <option value="PRESENT">PRESENT</option>
+                        <option value="LATE">LATE</option>
+                        <option value="ABSENT">ABSENT</option>
+                    </select>
+                </label>
+                <button type="submit">개별 기록</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${loginUser.canManageCourses() and selectedCourseId != null}" class="box" style="margin-top:14px;overflow:auto;">
+        <div class="step">3) 월간 출석표</div>
+        <table>
+            <thead>
+            <tr>
+                <th>학생</th>
+                <th th:each="d : ${monthDays}" th:text="${d}">1</th>
+                <th>누적 출석률</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(bulkEnrollments)}"><td colspan="40">강의를 선택해주세요.</td></tr>
+            <tr th:each="e : ${bulkEnrollments}">
+                <td th:text="${e.userName}"></td>
+                <td th:each="d : ${monthDays}" style="text-align:center;min-width:34px;"
+                    th:text="${monthlyStatus[e.enrollmentId] != null and monthlyStatus[e.enrollmentId][d] != null ? monthlyStatus[e.enrollmentId][d] : '-'}">-</td>
+                <td th:text="|${#numbers.formatDecimal(bulkRates[e.enrollmentId],1,1)}%|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${loginUser.canManageCourses() and selectedCourseId != null}" class="att-grid" style="margin-top:14px;">
+        <div class="box">
+            <div class="step">4) 결석/지각 이슈 나열</div>
+            <div class="toolbar" style="margin-bottom:8px;">
+                <form th:action="@{/attendance}" method="get">
+                    <input type="hidden" name="courseId" th:value="${selectedCourseId}">
+                    <input type="hidden" name="month" th:value="${selectedMonth}">
+                    <button type="submit" name="issueType" value="ALL">전체 이슈</button>
+                    <button type="submit" name="issueType" value="ABSENT">결석만</button>
+                    <button type="submit" name="issueType" value="LATE">지각만</button>
+                </form>
+            </div>
+            <table>
+                <thead><tr><th>학생</th><th>강의</th><th>결석</th><th>지각</th></tr></thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(monthlyIssues)}"><td colspan="4">해당 월 이슈 없음</td></tr>
+                <tr th:each="r : ${monthlyIssues}">
+                    <td th:text="${r.studentName}"></td>
+                    <td th:text="${r.courseTitle}"></td>
+                    <td th:text="${r.absentCount}"></td>
+                    <td th:text="${r.lateCount}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="box">
+            <div class="step">5) 지난달 vs 이번달 비교</div>
+            <table>
+                <thead>
+                <tr>
+                    <th>학생</th><th>강의</th>
+                    <th th:each="m : ${compareMonths}" th:text="|${m} 결석|"></th>
+                    <th th:each="m : ${compareMonths}" th:text="|${m} 지각|"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(monthlyCompareRows)}"><td colspan="6">비교할 데이터가 없습니다.</td></tr>
+                <tr th:each="r : ${monthlyCompareRows}">
+                    <td th:text="${r.studentName}"></td>
+                    <td th:text="${r.courseTitle}"></td>
+                    <td th:each="m : ${compareMonths}" th:text="${r.absentByMonth[m]}"></td>
+                    <td th:each="m : ${compareMonths}" th:text="${r.lateByMonth[m]}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:if="${loginUser.canManageCourses() and selectedCourseId != null}" class="box" style="margin-top:14px;overflow:auto;">
+        <div class="step">6) 학생별 일괄 편집</div>
+        <form th:action="@{/attendance/bulk-by-student}" method="post">
+            <input type="hidden" name="attendanceDate" th:value="${defaultAttendanceDate}">
+            <table>
+                <thead><tr><th>학생</th><th>강의</th><th>상태</th></tr></thead>
+                <tbody>
+                <tr th:each="e : ${bulkEnrollments}">
+                    <td th:text="${e.userName}"></td>
+                    <td th:text="${e.courseTitle}"></td>
+                    <td>
+                        <select th:name="|status_${e.enrollmentId}|">
+                            <option value="PRESENT">PRESENT</option>
+                            <option value="LATE">LATE</option>
+                            <option value="ABSENT">ABSENT</option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button type="submit">학생별 일괄 저장</button>
+        </form>
+    </div>
+
+    <div th:if="${!loginUser.canManageCourses()}" class="att-grid-1" style="margin-top:14px;">
+        <div class="box" style="overflow:auto;">
+            <div class="step">내 월간 출석표</div>
+            <form th:action="@{/attendance}" method="get" style="margin-bottom:8px;">
+                <label>월:</label>
+                <input type="month" name="month" th:value="${selectedMonth}">
+                <button type="submit">조회</button>
+            </form>
+            <table>
+                <thead><tr><th th:each="d : ${monthDays}" th:text="${d}"></th></tr></thead>
+                <tbody><tr><td th:each="d : ${monthDays}" style="text-align:center;min-width:34px;" th:text="${myMonthlyStatus[d] != null ? myMonthlyStatus[d] : '-'}">-</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="box" style="margin-top:14px;">
+        <div class="step">출석 원본 내역</div>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th><th>학생</th><th>강의</th><th>날짜</th><th>상태</th>
+                <th th:if="${loginUser.canManageCourses()}">관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${attendances}">
+                <td th:text="${a.attendanceId}"></td>
+                <td th:text="${a.userName}"></td>
+                <td th:text="${a.courseTitle}"></td>
+                <td th:text="${a.attendanceDate}"></td>
+                <td th:text="${a.status}"></td>
+                <td th:if="${loginUser.canManageCourses()}">
+                    <form th:action="@{/attendance/update}" method="post" style="display:inline-block">
+                        <input type="hidden" name="attendanceId" th:value="${a.attendanceId}">
+                        <select name="status">
+                            <option value="PRESENT" th:selected="${a.status == 'PRESENT'}">PRESENT</option>
+                            <option value="LATE" th:selected="${a.status == 'LATE'}">LATE</option>
+                            <option value="ABSENT" th:selected="${a.status == 'ABSENT'}">ABSENT</option>
+                        </select>
+                        <button type="submit">수정</button>
+                    </form>
+                    <form th:action="@{/attendance/delete}" method="post" style="display:inline-block">
+                        <input type="hidden" name="attendanceId" th:value="${a.attendanceId}">
+                        <button type="submit">삭제</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

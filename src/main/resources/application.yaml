@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: lms
+
+  profiles:
+    active: local
+
+  thymeleaf:
+    cache: false
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 30MB
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG

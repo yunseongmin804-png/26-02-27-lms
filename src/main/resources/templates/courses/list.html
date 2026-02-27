@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>강의 목록</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+<div class="page-title">
+    <h1>강의 목록</h1>
+    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+</div>
+<div class="topbar">
+    <a th:href="@{/}">홈</a>
+    <a th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}" th:href="@{/courses/new}">+ 강의 등록</a>
+</div>
+<p class="msg" th:if="${message}" th:text="${message}"></p>
+<div class="box" th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}">
+    <h3>강의 일괄 생성</h3>
+    <form th:action="@{/courses/bulk}" method="post">
+        <label>개수 <input type="number" name="count" min="1" max="100" value="10"></label>
+        <label>제목 접두사 <input type="text" name="titlePrefix" value="샘플 강의"></label>
+        <label>강사명 <input type="text" name="instructorName" value="강사1"></label>
+        <label>카테고리 <input type="text" name="category" value="IT/외국어"></label>
+        <label>정원 <input type="number" name="capacity" min="1" value="30"></label>
+        <button type="submit">일괄 생성</button>
+    </form>
+</div>
+
+<div class="box">
+<form th:action="@{/courses}" method="get">
+    <input type="text" name="keyword" th:value="${keyword}" placeholder="강의명 검색">
+    <select name="category">
+        <option value="" th:selected="${category == ''}">전체</option>
+        <option value="IT/외국어" th:selected="${category == 'IT/외국어'}">IT/외국어</option>
+        <option value="건강/교양" th:selected="${category == '건강/교양'}">건강/교양</option>
+        <option value="취미/예술" th:selected="${category == '취미/예술'}">취미/예술</option>
+    </select>
+    <button type="submit">검색</button>
+</form>
+</div>
+
+<div class="box">
+<table>
+    <thead><tr><th>ID</th><th>제목</th><th>카테고리</th><th>강사</th><th>정원</th></tr></thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(courses)}"><td colspan="5">데이터 없음</td></tr>
+    <tr th:each="c : ${courses}">
+        <td th:text="${c.id}"></td>
+        <td><a th:href="@{|/courses/${c.id}|}" th:text="${c.title}"></a></td>
+        <td th:text="${c.category}"></td>
+        <td th:text="${c.instructorName}"></td>
+        <td th:text="${c.capacity}"></td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="pager">
+    <a th:if="${page > 1}" th:href="@{/courses(page=${page-1},size=${size},keyword=${keyword},category=${category})}">이전</a>
+    <span th:text="|${page} / ${totalPages} 페이지 (총 ${totalCount}건)|"></span>
+    <a th:if="${page < totalPages}" th:href="@{/courses(page=${page+1},size=${size},keyword=${keyword},category=${category})}">다음</a>
+</div>
+</div>
+</body>
+</html>

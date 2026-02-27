@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>강의 상세</title></head>
+<body style="font-family:sans-serif;margin:40px;">
+<h1>강의 상세</h1>
+<p><a th:href="@{/courses}">목록</a> | <a th:href="@{/}">홈</a></p>
+<ul>
+    <li><b>ID:</b> <span th:text="${course.id}"></span></li>
+    <li><b>제목:</b> <span th:text="${course.title}"></span></li>
+    <li><b>카테고리:</b> <span th:text="${course.category}"></span></li>
+    <li><b>강사:</b> <span th:text="${course.instructorName}"></span></li>
+    <li><b>정원:</b> <span th:text="${course.capacity}"></span></li>
+</ul>
+
+<p>
+    <a th:href="@{|/courses/${course.id}/learn|}">▶ 강의듣기 + 퀴즈</a>
+</p>
+
+<div th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}">
+    <a th:href="@{|/courses/${course.id}/edit|}">수정</a>
+    <form th:action="@{|/courses/${course.id}/delete|}" method="post" style="display:inline;">
+        <button type="submit" onclick="return confirm('정말 삭제할까요?')">삭제</button>
+    </form>
+</div>
+</body>
+</html>

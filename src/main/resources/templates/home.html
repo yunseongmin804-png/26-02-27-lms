@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>LMS 포털</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <div class="inner">
+        <div class="brand">학습관리시스템(LMS)</div>
+        <div class="nav">
+            <button type="button" class="secondary" onclick="location.href='/notices?page=1&size=10&sort=latest'">공지사항</button>
+            <button type="button" class="secondary" onclick="location.href='/qna?page=1&size=10&sort=latest'">Q&A</button>
+            <button type="button" class="secondary" onclick="location.href='/courses'">강의</button>
+            <span class="pill" th:text="|${loginUser.name} (${loginUser.role})|"></span>
+            <form th:action="@{/logout}" method="post"><button type="submit">로그아웃</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <section class="hero">
+        <div class="hero-main">
+            <h1>학습관리시스템</h1>
+            <p>※ 과제 제출, 출석, 공지 확인을 한 번에 관리하세요.</p>
+            <div class="stats" style="margin-top:18px;">
+                <div class="stat"><div class="label">사용자</div><div class="value" th:text="${userCount}">0</div></div>
+                <div class="stat"><div class="label">강의</div><div class="value" th:text="${courseCount}">0</div></div>
+                <div class="stat"><div class="label">수강신청</div><div class="value" th:text="${enrollmentCount}">0</div></div>
+            </div>
+        </div>
+        <aside class="hero-side">
+            <h3>빠른 지표</h3>
+            <div>미답변 Q&A: <b th:text="${unansweredQnaCount}">0</b></div>
+            <div>미채점 제출: <b th:text="${ungradedSubmissionCount}">0</b></div>
+            <div>출석률: <b th:text="|${#numbers.formatDecimal(attendanceSummary.attendanceRate,1,1)}%|">0.0%</b></div>
+            <div>7일 내 마감 과제: <b th:text="${dueSoonCount}">0</b></div>
+            <div>마감 지난 과제: <b th:text="${overdueCount}">0</b></div>
+        </aside>
+    </section>
+
+    <section class="quick">
+        <a th:href="@{/users}">사용자 관리</a>
+        <a th:href="@{/courses}">강의 관리</a>
+        <a th:href="@{/enrollments}">수강신청 관리</a>
+        <a th:href="@{/assignments}">과제/제출 관리</a>
+        <a th:href="@{/attendance}">출석 관리</a>
+        <button type="button" onclick="location.href='/notices?page=1&size=10&sort=latest'">공지사항</button>
+        <button type="button" onclick="location.href='/qna?page=1&size=10&sort=latest'">Q&A</button>
+        <a th:if="${loginUser.role == 'ADMIN'}" th:href="@{/admin/dashboard}">관리자 대시보드</a>
+    </section>
+
+    <section class="section-grid">
+        <div class="card list-card">
+            <div class="head"><h3>사용 안내</h3><span class="badge">Manual</span></div>
+            <ul>
+                <li>과제는 <b>마감일 전</b>까지 제출/재제출 가능합니다.</li>
+                <li>출석은 강의별 일괄 기록과 학생별 편집을 지원합니다.</li>
+                <li>관리자는 결석 위험학생 기준을 대시보드에서 조정할 수 있습니다.</li>
+            </ul>
+            <div class="row" style="margin-top:8px;">
+                <button type="button" class="secondary" onclick="location.href='/notices?page=1&size=10&sort=latest'">공지사항 바로가기</button>
+                <button type="button" class="secondary" onclick="location.href='/qna?page=1&size=10&sort=latest'">Q&A 바로가기</button>
+            </div>
+        </div>
+        <div class="card list-card">
+            <div class="head"><h3>오늘 할 일 추천</h3><span class="badge">Focus</span></div>
+            <ul>
+                <li>미채점 제출 확인 후 채점 완료</li>
+                <li>미답변 Q&A 답변 처리</li>
+                <li>마감 임박 과제 공지 점검</li>
+            </ul>
+            <div class="row" style="margin-top:8px;">
+                <a class="pill" th:href="@{/assignments?mode=manage}">채점하러 가기</a>
+                <a class="pill" th:href="@{/attendance}">출석 관리 가기</a>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

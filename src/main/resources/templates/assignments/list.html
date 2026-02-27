@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>과제/제출 관리</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+<div class="page-title">
+    <h1>과제/제출 관리</h1>
+    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+</div>
+<div class="topbar">
+    <div>
+        <a th:href="@{/}">홈</a> |
+        <a th:href="@{/assignments/manage}">강사용 뷰</a> |
+        <a th:href="@{/assignments/my}">내 제출 뷰</a>
+    </div>
+    <div>
+        <span th:text="|현재 모드: ${mode}|"></span> |
+        <span th:text="|로그인: ${loginUser.name} (${loginUser.role})|"></span>
+    </div>
+</div>
+<p class="msg" th:if="${message != null}" th:text="${message}"></p>
+
+<div class="box">
+    <h3>과제 필터</h3>
+    <form class="row" th:action="@{/assignments}" method="get">
+        <label>강의
+            <select name="courseId">
+                <option value="" th:selected="${selectedCourseId == null}">전체 강의</option>
+                <option th:each="c : ${courses}"
+                        th:value="${c.id}"
+                        th:selected="${selectedCourseId != null and selectedCourseId == c.id}"
+                        th:text="|${c.title} (${c.category})|"></option>
+            </select>
+        </label>
+        <button type="submit">조회</button>
+    </form>
+</div>
+
+<div class="box" th:if="${showCreateForm}">
+    <h3>과제 등록</h3>
+    <form th:action="@{/assignments}" method="post" style="display:grid;gap:8px;max-width:700px;">
+        <label>강의
+            <select name="courseId" required>
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="|${c.title} (${c.category})|"></option>
+            </select>
+        </label>
+        <input name="title" placeholder="과제 제목" required>
+        <textarea name="description" rows="3" placeholder="과제 설명"></textarea>
+        <label>마감일 <input type="date" name="dueDate"></label>
+        <button type="submit">과제 등록</button>
+    </form>
+
+    <h3 style="margin-top:14px;">과제 일괄 생성</h3>
+    <form th:action="@{/assignments/bulk}" method="post">
+        <label>강의
+            <select name="courseId" required>
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="|${c.title} (${c.category})|"></option>
+            </select>
+        </label>
+        <label>개수 <input type="number" name="count" min="1" max="100" value="10"></label>
+        <label>제목 접두사 <input type="text" name="titlePrefix" value="샘플 과제"></label>
+        <label>마감 시작+일 <input type="number" name="dueAfterDays" min="0" value="1"></label>
+        <button type="submit">과제 일괄 생성</button>
+    </form>
+</div>
+
+<div class="box">
+<h3>과제 목록</h3>
+<table>
+    <thead>
+    <tr><th>ID</th><th>강의</th><th>제목</th><th>설명</th><th>마감일</th><th>제출/재제출</th></tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(assignments)}"><td colspan="6">등록된 과제가 없습니다.</td></tr>
+    <tr th:each="a : ${assignments}">
+        <td th:text="${a.assignmentId}"></td>
+        <td th:text="${a.courseTitle}"></td>
+        <td th:text="${a.title}"></td>
+        <td th:text="${a.description}"></td>
+        <td th:text="${a.dueDate}"></td>
+        <td>
+            <form th:action="@{|/assignments/${a.assignmentId}/submit|}" method="post" enctype="multipart/form-data" style="display:grid;gap:6px;">
+                <textarea name="content" rows="2" placeholder="제출 내용" required></textarea>
+                <input type="file" name="attachment">
+                <button type="submit">제출/재제출</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 style="margin-top:20px;">제출 내역</h3>
+<table>
+    <thead>
+    <tr><th>제출ID</th><th>과제</th><th>학생</th><th>내용</th><th>첨부</th><th>점수</th><th>피드백</th><th>채점</th></tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(submissions)}"><td colspan="8">제출 내역이 없습니다.</td></tr>
+    <tr th:each="s : ${submissions}">
+        <td th:text="${s.submissionId}"></td>
+        <td th:text="${s.assignmentTitle}"></td>
+        <td th:text="${s.studentName}"></td>
+        <td th:text="${s.content}"></td>
+        <td>
+            <a th:if="${s.attachmentPath != null}" th:href="@{|/files/submissions/${s.attachmentPath}|}" th:text="${s.attachmentPath}"></a>
+        </td>
+        <td th:text="${s.score}"></td>
+        <td th:text="${s.feedback}"></td>
+        <td>
+            <form th:if="${showGrading}"
+                  th:action="@{|/assignments/submissions/${s.submissionId}/grade|}" method="post" style="display:grid;gap:6px;">
+                <input type="number" name="score" min="0" max="100" placeholder="점수" required>
+                <input type="text" name="feedback" placeholder="피드백">
+                <button type="submit">채점</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+</div>
+</body>
+</html>

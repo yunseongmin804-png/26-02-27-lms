@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 목록</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+<h1>사용자 목록</h1>
+<div class="topbar">
+    <a th:href="@{/}">홈</a>
+    <a th:if="${loginUser.role == 'ADMIN'}" th:href="@{/users/new}">+ 사용자 등록</a>
+    <span th:text="|로그인: ${loginUser.name} (${loginUser.role})|">로그인 상태</span>
+</div>
+<p class="msg" th:if="${message}" th:text="${message}"></p>
+<div class="box" th:if="${loginUser.role == 'ADMIN'}">
+    <h3>학생 일괄 생성</h3>
+    <form th:action="@{/users/bulk-students}" method="post">
+        <label>인원 <input type="number" name="count" min="1" max="200" value="20"></label>
+        <label>이름 접두사 <input type="text" name="prefix" value="학생"></label>
+        <button type="submit">일괄 생성</button>
+    </form>
+</div>
+
+<table>
+    <thead><tr><th>ID</th><th>Email</th><th>Name</th><th>Role</th></tr></thead>
+    <tbody>
+    <tr th:each="u : ${users}">
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.name}"></td>
+        <td th:text="${u.role}"></td>
+    </tr>
+    </tbody>
+</table>
+</div>
+</body>
+</html>

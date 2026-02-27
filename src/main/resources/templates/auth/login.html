@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>.err{color:#b91c1c;font-weight:700}.login-box{max-width:420px;margin:80px auto}</style>
+</head>
+<body>
+<div class="box login-box">
+    <h2>LMS 로그인</h2>
+    <p class="err" th:if="${error != null}" th:text="${error}"></p>
+
+    <form th:action="@{/login}" method="post">
+        <label for="userId">사용자 선택</label>
+        <select id="userId" name="userId" required>
+            <option th:each="u : ${users}" th:value="${u.id}" th:text="|${u.name} (${u.role})|"></option>
+        </select>
+        <button type="submit">로그인</button>
+    </form>
+</div>
+</body>
+</html>

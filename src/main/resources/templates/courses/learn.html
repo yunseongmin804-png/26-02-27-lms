@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>강의 듣기</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+    <div class="page-title">
+        <h1 th:text="|강의듣기 - ${course.title}|"></h1>
+        <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+    </div>
+    <div class="topbar">
+        <a th:href="@{|/courses/${course.id}|}">강의 상세</a>
+        <a th:href="@{/courses}">강의 목록</a>
+    </div>
+
+    <p class="msg" th:if="${message}" th:text="${message}"></p>
+
+    <div class="box">
+        <h3>강의 영상</h3>
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
+            <iframe th:src="${videoUrl}"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div class="box" style="margin-top:12px;">
+        <h3>미니 퀴즈</h3>
+        <p><b th:text="${quiz.question}"></b></p>
+        <form th:action="@{|/courses/${course.id}/quiz|}" method="post" style="display:block;">
+            <div th:each="opt, stat : ${quiz.options}" style="margin:6px 0;">
+                <label>
+                    <input type="radio" name="answer" th:value="${stat.index}" required>
+                    <span th:text="${opt}"></span>
+                </label>
+            </div>
+            <button type="submit">정답 제출</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

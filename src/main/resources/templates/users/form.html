@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>사용자 등록</title></head>
+<body style="font-family:sans-serif;margin:40px;">
+<h1>사용자 등록 (ADMIN 전용)</h1>
+<form th:action="@{/users}" method="post" style="width:420px;display:grid;gap:10px;">
+    <input name="email" type="email" placeholder="email" required>
+    <input name="name" type="text" placeholder="이름" required>
+    <select name="role">
+        <option value="STUDENT">STUDENT</option>
+        <option value="INSTRUCTOR">INSTRUCTOR</option>
+        <option value="ADMIN">ADMIN</option>
+    </select>
+    <button type="submit">등록</button>
+</form>
+<p><a th:href="@{/users}">목록으로</a></p>
+</body>
+</html>

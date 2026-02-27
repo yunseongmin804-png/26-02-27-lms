@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Q&A</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+<div class="page-title">
+    <h1>Q&A</h1>
+    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+</div>
+<div class="topbar">
+    <a th:href="@{/}">홈</a>
+</div>
+<p class="msg" th:if="${message != null}" th:text="${message}"></p>
+
+<div class="box">
+    <form class="row" th:action="@{/qna}" method="get">
+        <input name="keyword" th:value="${keyword}" placeholder="질문 검색">
+        <select name="sort">
+            <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
+            <option value="oldest" th:selected="${sort == 'oldest'}">오래된순</option>
+        </select>
+        <button type="submit">검색</button>
+    </form>
+</div>
+
+<div class="box">
+    <h3>질문 등록</h3>
+    <form th:action="@{/qna/ask}" method="post" style="display:grid;gap:8px;max-width:800px;">
+        <input name="title" placeholder="질문 제목" required>
+        <textarea name="content" rows="4" placeholder="질문 내용" required></textarea>
+        <button type="submit">질문 등록</button>
+    </form>
+</div>
+
+<div class="box">
+<table>
+    <thead>
+    <tr><th>Q.ID</th><th>질문자</th><th>제목</th><th>질문</th><th>질문일</th><th>답변</th><th>답변일</th><th>답변추가</th></tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(qnaList)}"><td colspan="8">등록된 질문이 없습니다.</td></tr>
+    <tr th:each="q : ${qnaList}">
+        <td th:text="${q.questionId}"></td>
+        <td th:text="${q.studentName}"></td>
+        <td th:text="${q.title}"></td>
+        <td th:text="${q.questionContent}"></td>
+        <td th:text="${#temporals.format(q.questionCreatedAt, 'yyyy-MM-dd HH:mm')}"></td>
+        <td>
+            <div th:if="${q.answerContent != null}">
+                <b th:text="${q.responderName}"></b>
+                <div th:text="${q.answerContent}"></div>
+            </div>
+        </td>
+        <td th:text="${q.answerCreatedAt != null ? #temporals.format(q.answerCreatedAt, 'yyyy-MM-dd HH:mm') : ''}"></td>
+        <td>
+            <form th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}"
+                  th:action="@{/qna/answer}" method="post" style="display:grid;gap:6px;">
+                <input type="hidden" name="questionId" th:value="${q.questionId}">
+                <textarea name="content" rows="3" placeholder="답변 내용" required></textarea>
+                <button type="submit">답변 등록</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="pager">
+    <a th:if="${page > 1}" th:href="@{/qna(page=${page-1},size=${size},keyword=${keyword},sort=${sort})}">이전</a>
+    <span th:text="|${page}/${totalPages} 페이지 (총 ${totalCount}건)|"></span>
+    <a th:if="${page < totalPages}" th:href="@{/qna(page=${page+1},size=${size},keyword=${keyword},sort=${sort})}">다음</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 대시보드</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+<div class="page-title">
+    <h1>관리자 대시보드</h1>
+    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+</div>
+<div class="topbar">
+    <a th:href="@{/}">홈</a>
+</div>
+<p class="msg" th:if="${message}" th:text="${message}"></p>
+
+<div class="box" style="margin-bottom:14px;">
+    <h3>원클릭 데모 세팅</h3>
+    <form th:action="@{/admin/demo-seed}" method="post">
+        <button type="submit">학생/강의/수강/과제 한번에 생성</button>
+    </form>
+</div>
+
+<div class="stats">
+    <div class="card"><div class="label">사용자 수</div><div class="value" th:text="${userCount}"></div></div>
+    <div class="card"><div class="label">강의 수</div><div class="value" th:text="${courseCount}"></div></div>
+    <div class="card"><div class="label">수강신청 수</div><div class="value" th:text="${enrollmentCount}"></div></div>
+    <div class="card"><div class="label">미답변 Q&A</div><div class="value" th:text="${unansweredQnaCount}"></div></div>
+    <div class="card"><div class="label">미채점 제출</div><div class="value" th:text="${ungradedSubmissionCount}"></div></div>
+    <div class="card"><div class="label" th:text="|결석 위험(${riskAbsentThreshold}%↑)|">결석 위험</div><div class="value" th:text="${riskAbsentCount}"></div></div>
+</div>
+
+<div class="box" style="margin-top:14px;">
+<h2 style="margin-top: 0;" th:text="|결석 위험 학생 (${#numbers.formatDecimal(riskAbsentThreshold,1,1)}% 이상)|">결석 위험 학생</h2>
+<form th:action="@{/admin/dashboard}" method="get" style="margin-bottom:8px;">
+    <label>기준(%):</label>
+    <input type="number" name="threshold" min="0" max="100" step="0.1" th:value="${riskAbsentThreshold}" style="width:90px;">
+    <label>표시수:</label>
+    <input type="number" name="riskLimit" min="1" max="100" th:value="${riskLimit}" style="width:80px;">
+    <button type="submit">적용</button>
+    <button type="submit" formaction="/admin/risk-notice-draft" formmethod="get">공지 초안 채우기</button>
+    <button type="submit" formaction="/admin/risk-notice-draft-by-course" formmethod="get" formtarget="_blank">과목별 공지 초안(.md)</button>
+    <button type="submit" formaction="/admin/risk-notice-create-by-course" formmethod="get">과목별 공지 자동등록</button>
+    <button type="submit" formaction="/admin/risk-message-template" formmethod="get" formtarget="_blank">경고 메시지 템플릿 다운로드</button>
+</form>
+<table>
+    <thead>
+    <tr>
+        <th>학생</th>
+        <th>강의</th>
+        <th>결석</th>
+        <th>전체</th>
+        <th>결석률(%)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(riskAbsentees)}">
+        <td colspan="5">현재 위험 학생이 없습니다.</td>
+    </tr>
+    <tr th:each="r : ${riskAbsentees}">
+        <td th:text="${r.studentName}"></td>
+        <td th:text="${r.courseTitle}"></td>
+        <td th:text="${r.absentCount}"></td>
+        <td th:text="${r.totalCount}"></td>
+        <td th:text="${#numbers.formatDecimal(r.absentRate(),1,1)}"></td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="box">
+<h2 style="margin-top: 0;">결석 상위 TOP 10</h2>
+<table>
+    <thead>
+    <tr>
+        <th>순위</th>
+        <th>학생</th>
+        <th>강의</th>
+        <th>결석</th>
+        <th>전체</th>
+        <th>결석률(%)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(topAbsentees)}">
+        <td colspan="6">데이터가 없습니다.</td>
+    </tr>
+    <tr th:each="r, stat : ${topAbsentees}">
+        <td th:text="${stat.count}"></td>
+        <td th:text="${r.studentName}"></td>
+        <td th:text="${r.courseTitle}"></td>
+        <td th:text="${r.absentCount}"></td>
+        <td th:text="${r.totalCount}"></td>
+        <td th:text="${#numbers.formatDecimal(r.absentRate(),1,1)}"></td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="box">
+<h2 style="margin-top: 0;">최근 감사 로그</h2>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>사용자</th>
+        <th>권한</th>
+        <th>액션</th>
+        <th>대상</th>
+        <th>대상ID</th>
+        <th>상세</th>
+        <th>시각</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(recentAuditLogs)}">
+        <td colspan="8">감사 로그가 없습니다.</td>
+    </tr>
+    <tr th:each="log : ${recentAuditLogs}">
+        <td th:text="${log.id}"></td>
+        <td th:text="${log.actorName}"></td>
+        <td th:text="${log.actorRole}"></td>
+        <td th:text="${log.action}"></td>
+        <td th:text="${log.targetType}"></td>
+        <td th:text="${log.targetId}"></td>
+        <td th:text="${log.detail}"></td>
+        <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+    </tr>
+    </tbody>
+</table>
+</div>
+</div>
+</body>
+</html>

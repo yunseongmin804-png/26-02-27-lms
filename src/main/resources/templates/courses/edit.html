@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>강의 수정</title></head>
+<body style="font-family:sans-serif;margin:40px;">
+<h1>강의 수정</h1>
+<form th:action="@{|/courses/${course.id}/edit|}" method="post" style="width:500px;display:grid;gap:10px;">
+    <input name="title" th:value="${course.title}" required>
+    <input name="category" th:value="${course.category}" required>
+    <input name="instructorName" th:value="${course.instructorName}" required>
+    <input name="capacity" type="number" min="1" th:value="${course.capacity}" required>
+    <button type="submit">저장</button>
+</form>
+<p><a th:href="@{|/courses/${course.id}|}">상세로</a></p>
+</body>
+</html>

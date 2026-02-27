@@ -1,0 +1,19 @@
+package com.example.lms.repository.user;
+
+import com.example.lms.domain.user.User;
+import org.springframework.jdbc.core.RowMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class UserRowMapper implements RowMapper<User> {
+    @Override
+    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new User(
+                rs.getLong("id"),
+                rs.getString("email"),
+                rs.getString("name"),
+                rs.getString("role")
+        );
+    }
+}
