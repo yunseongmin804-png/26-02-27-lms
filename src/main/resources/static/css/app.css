@@ -28,6 +28,8 @@ input,select,textarea,button{padding:9px 11px;border:1px solid #c7d5ea;border-ra
 button{background:var(--primary);color:#fff;border-color:var(--primary);cursor:pointer;font-weight:600}
 button:hover{background:var(--primary-600)}
 button.secondary{background:#fff;color:var(--text)}
+button.danger{background:var(--danger);border-color:var(--danger)}
+button.danger:hover{filter:brightness(.95)}
 
 form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}

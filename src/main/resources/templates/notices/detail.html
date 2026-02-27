@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>공지 상세</title></head>
-<body style="font-family:sans-serif;margin:32px;">
-<h1>공지 상세</h1>
-<p><a th:href="@{/notices}">목록</a> | <a th:href="@{/}">홈</a></p>
+<head>
+    <meta charset="UTF-8">
+    <title>공지 상세</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/common :: pageHeader('공지 상세', ${loginUser})}"></div>
 
-<h2 th:text="${notice.title}"></h2>
-<p><b>작성자:</b> <span th:text="${notice.authorName}"></span></p>
-<div style="border:1px solid #ddd;padding:12px;border-radius:8px;max-width:900px;white-space:pre-wrap;" th:text="${notice.content}"></div>
+    <div class="box">
+        <h2 th:text="${notice.title}"></h2>
+        <p class="muted">
+            작성자: <b th:text="${notice.authorName}"></b> ·
+            작성일: <span th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+        </p>
+        <div style="white-space:pre-wrap;border:1px solid #dbe5f1;border-radius:10px;padding:12px;" th:text="${notice.content}"></div>
 
-<div style="margin-top:12px;" th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}">
-    <a th:href="@{|/notices/${notice.id}/edit|}">수정</a>
-    <form th:action="@{|/notices/${notice.id}/delete|}" method="post" style="display:inline;">
-        <button type="submit" onclick="return confirm('삭제할까요?')">삭제</button>
-    </form>
+        <div class="row" style="margin-top:12px;" th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}">
+            <a th:href="@{|/notices/${notice.id}/edit|}">수정</a>
+            <form th:action="@{|/notices/${notice.id}/delete|}" method="post" onsubmit="return confirm('공지사항을 삭제할까요?');">
+                <button type="submit" class="danger">삭제</button>
+            </form>
+        </div>
+    </div>
 </div>
 </body>
 </html>

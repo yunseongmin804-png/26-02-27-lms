@@ -7,19 +7,15 @@
 </head>
 <body>
 <div class="container">
-<div class="page-title">
-    <h1>강의 목록</h1>
-    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
-</div>
-<div class="topbar">
-    <a th:href="@{/}">홈</a>
-    <a th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}" th:href="@{/courses/new}">+ 강의 등록</a>
+<div th:replace="~{fragments/common :: pageHeader('강의 목록', ${loginUser})}"></div>
+<div class="topbar" th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}">
+    <a th:href="@{/courses/new}">+ 강의 등록</a>
 </div>
 <p class="msg" th:if="${message}" th:text="${message}"></p>
 <div class="box" th:if="${loginUser.role == 'ADMIN' or loginUser.role == 'INSTRUCTOR'}">
     <h3>강의 일괄 생성</h3>
     <form th:action="@{/courses/bulk}" method="post">
-        <label>개수 <input type="number" name="count" min="1" max="100" value="10"></label>
+        <label>개수 <input type="number" name="count" min="1" max="100" value="10" title="권장 5~20"></label>
         <label>제목 접두사 <input type="text" name="titlePrefix" value="샘플 강의"></label>
         <label>강사명 <input type="text" name="instructorName" value="강사1"></label>
         <label>카테고리 <input type="text" name="category" value="IT/외국어"></label>
@@ -45,7 +41,7 @@
 <table>
     <thead><tr><th>ID</th><th>제목</th><th>카테고리</th><th>강사</th><th>정원</th></tr></thead>
     <tbody>
-    <tr th:if="${#lists.isEmpty(courses)}"><td colspan="5">데이터 없음</td></tr>
+    <tr th:if="${#lists.isEmpty(courses)}"><td colspan="5">조회 결과가 없습니다. 검색어/카테고리를 바꿔보세요.</td></tr>
     <tr th:each="c : ${courses}">
         <td th:text="${c.id}"></td>
         <td><a th:href="@{|/courses/${c.id}|}" th:text="${c.title}"></a></td>

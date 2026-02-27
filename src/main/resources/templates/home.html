@@ -41,11 +41,11 @@
     </section>
 
     <section class="quick">
-        <a th:href="@{/users}">사용자 관리</a>
-        <a th:href="@{/courses}">강의 관리</a>
-        <a th:href="@{/enrollments}">수강신청 관리</a>
-        <a th:href="@{/assignments}">과제/제출 관리</a>
-        <a th:href="@{/attendance}">출석 관리</a>
+        <a th:if="${loginUser.role == 'ADMIN'}" th:href="@{/users}">사용자 관리</a>
+        <a th:href="@{/courses}" th:text="${loginUser.role == 'STUDENT' ? '강의 조회' : '강의 관리'}">강의 관리</a>
+        <a th:href="@{/enrollments}" th:text="${loginUser.role == 'STUDENT' ? '내 수강신청' : '수강신청 관리'}">수강신청 관리</a>
+        <a th:href="@{/assignments}" th:text="${loginUser.role == 'STUDENT' ? '과제 제출' : '과제/제출 관리'}">과제/제출 관리</a>
+        <a th:href="@{/attendance}" th:text="${loginUser.role == 'STUDENT' ? '내 출석 확인' : '출석 관리'}">출석 관리</a>
         <button type="button" onclick="location.href='/notices?page=1&size=10&sort=latest'">공지사항</button>
         <button type="button" onclick="location.href='/qna?page=1&size=10&sort=latest'">Q&A</button>
         <a th:if="${loginUser.role == 'ADMIN'}" th:href="@{/admin/dashboard}">관리자 대시보드</a>

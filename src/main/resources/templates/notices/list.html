@@ -7,13 +7,7 @@
 </head>
 <body>
 <div class="container">
-<div class="page-title">
-    <h1>공지사항</h1>
-    <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
-</div>
-<div class="topbar">
-    <a th:href="@{/}">홈</a>
-</div>
+<div th:replace="~{fragments/common :: pageHeader('공지사항', ${loginUser})}"></div>
 <p class="msg" th:if="${message != null}" th:text="${message}"></p>
 
 <div class="box">

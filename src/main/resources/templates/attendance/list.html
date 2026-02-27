@@ -18,13 +18,7 @@
 </head>
 <body>
 <div class="container">
-    <div class="page-title">
-        <h1>출석 관리</h1>
-        <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
-    </div>
-    <div class="topbar">
-        <a th:href="@{/}">홈</a>
-    </div>
+    <div th:replace="~{fragments/common :: pageHeader('출석 관리', ${loginUser})}"></div>
 
     <p class="msg" th:if="${message}" th:text="${message}"></p>
 
@@ -109,7 +103,7 @@
             <tr th:each="e : ${bulkEnrollments}">
                 <td th:text="${e.userName}"></td>
                 <td th:each="d : ${monthDays}" style="text-align:center;min-width:34px;"
-                    th:text="${monthlyStatus[e.enrollmentId] != null and monthlyStatus[e.enrollmentId][d] != null ? monthlyStatus[e.enrollmentId][d] : '-'}">-</td>
+                    th:text="${monthlyStatus[e.enrollmentId] != null and monthlyStatus[e.enrollmentId][d] != null ? (monthlyStatus[e.enrollmentId][d] == 'PRESENT' ? '출석' : (monthlyStatus[e.enrollmentId][d] == 'LATE' ? '지각' : '결석')) : '-'}">-</td>
                 <td th:text="|${#numbers.formatDecimal(bulkRates[e.enrollmentId],1,1)}%|"></td>
             </tr>
             </tbody>
@@ -199,7 +193,7 @@
             </form>
             <table>
                 <thead><tr><th th:each="d : ${monthDays}" th:text="${d}"></th></tr></thead>
-                <tbody><tr><td th:each="d : ${monthDays}" style="text-align:center;min-width:34px;" th:text="${myMonthlyStatus[d] != null ? myMonthlyStatus[d] : '-'}">-</td></tr></tbody>
+                <tbody><tr><td th:each="d : ${monthDays}" style="text-align:center;min-width:34px;" th:text="${myMonthlyStatus[d] != null ? (myMonthlyStatus[d] == 'PRESENT' ? '출석' : (myMonthlyStatus[d] == 'LATE' ? '지각' : '결석')) : '-'}">-</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -219,7 +213,7 @@
                 <td th:text="${a.userName}"></td>
                 <td th:text="${a.courseTitle}"></td>
                 <td th:text="${a.attendanceDate}"></td>
-                <td th:text="${a.status}"></td>
+                <td th:text="${a.status == 'PRESENT' ? '출석' : (a.status == 'LATE' ? '지각' : '결석')}"></td>
                 <td th:if="${loginUser.canManageCourses()}">
                     <form th:action="@{/attendance/update}" method="post" style="display:inline-block">
                         <input type="hidden" name="attendanceId" th:value="${a.attendanceId}">
@@ -230,9 +224,9 @@
                         </select>
                         <button type="submit">수정</button>
                     </form>
-                    <form th:action="@{/attendance/delete}" method="post" style="display:inline-block">
+                    <form th:action="@{/attendance/delete}" method="post" style="display:inline-block" onsubmit="return confirm('출석 기록을 삭제할까요?');">
                         <input type="hidden" name="attendanceId" th:value="${a.attendanceId}">
-                        <button type="submit">삭제</button>
+                        <button type="submit" class="danger">삭제</button>
                     </form>
                 </td>
             </tr>

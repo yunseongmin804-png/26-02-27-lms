@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="pageHeader(title, loginUser)">
+    <div class="page-title">
+        <h1 th:text="${title}">페이지</h1>
+        <span class="chip" th:text="|${loginUser.name} · ${loginUser.role}|"></span>
+    </div>
+    <div class="topbar">
+        <div class="row">
+            <a th:href="@{/}">홈</a>
+            <a th:href="@{/courses}">강의</a>
+            <a th:href="@{/assignments}">과제</a>
+            <a th:href="@{/attendance}">출석</a>
+            <a th:href="@{/notices(page=1,size=10,sort='latest')}">공지</a>
+            <a th:href="@{/qna(page=1,size=10,sort='latest')}">Q&A</a>
+            <a th:if="${loginUser.role == 'ADMIN'}" th:href="@{/admin/dashboard}">관리자 대시보드</a>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="secondary">로그아웃</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
