@@ -36,6 +36,7 @@ public class ChatbotGatewayService {
         this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
+                .version(HttpClient.Version.HTTP_1_1)
                 .build();
     }
 
