@@ -48,16 +48,18 @@
         body: JSON.stringify({ message: text })
       });
 
+      const payload = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const detail = payload?.error?.message || `HTTP ${response.status}`;
+        throw new Error(detail);
       }
 
-      const payload = await response.json();
       const answer = payload?.data?.answer ?? '죄송해요. 답변을 받아오지 못했어요.';
       appendMessage(answer, 'bot');
     } catch (error) {
       console.error(error);
-      appendMessage('챗봇 연결에 실패했어요. 잠시 후 다시 시도해주세요.', 'bot');
+      appendMessage(`챗봇 연결 실패: ${error.message}`, 'bot');
     } finally {
       input.disabled = false;
       input.focus();
