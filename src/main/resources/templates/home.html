@@ -78,5 +78,21 @@
         </div>
     </section>
 </div>
+
+<button id="chatbot-toggle" class="chatbot-toggle" type="button" aria-label="챗봇 열기">🤖</button>
+<section id="chatbot-panel" class="chatbot-panel" aria-label="LMS 챗봇">
+    <div class="chatbot-head">
+        <strong>LMS 도우미</strong>
+        <button id="chatbot-close" type="button" class="secondary">닫기</button>
+    </div>
+    <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chatbot-msg bot">안녕하세요! LMS 사용 관련 질문을 도와드릴게요.</div>
+    </div>
+    <form id="chatbot-form" class="chatbot-form">
+        <input id="chatbot-input" type="text" maxlength="500" placeholder="예: 과제 제출은 어디서 해요?" autocomplete="off">
+        <button type="submit">전송</button>
+    </form>
+</section>
+<script th:src="@{/js/chatbot.js}"></script>
 </body>
 </html>
