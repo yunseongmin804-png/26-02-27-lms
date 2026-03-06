@@ -64,7 +64,11 @@ public class ChatbotGatewayService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 400) {
-                throw new IllegalStateException("챗봇 응답 오류: HTTP " + response.statusCode());
+                String body = response.body() == null ? "" : response.body();
+                if (body.length() > 300) {
+                    body = body.substring(0, 300) + "...";
+                }
+                throw new IllegalStateException("챗봇 응답 오류: HTTP " + response.statusCode() + " | url=" + gatewayUrl + " | body=" + body);
             }
 
             JsonNode root = objectMapper.readTree(response.body());
